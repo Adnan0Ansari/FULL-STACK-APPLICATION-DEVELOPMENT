@@ -1,0 +1,5 @@
+shopkart-backend/node_modules/
+shopkart-backend/.env
+shopkart-frontend/node_modules/
+shopkart-frontend/dist/
+node_modules/
