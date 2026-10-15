@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { useCart } from "../context/CartContext";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ function Login() {
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { fetchCart } = useCart();
 
   const handleChange = (e) => {
     setFormData({
@@ -23,6 +25,7 @@ function Login() {
 
     try {
       await api.post("/customers/login", formData);
+      await fetchCart();
       navigate("/home");
     } catch (err) {
       setError("Invalid Credentials");

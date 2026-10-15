@@ -1,12 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { useCart } from "../context/CartContext";
 
 function ProductCard({ product, initiallyWishlisted }) {
   const navigate = useNavigate();
+  const { addToCart, pendingIds } = useCart();
   const [wishlistStatus, setWishlistStatus] = useState(
     initiallyWishlisted ? "saved" : "idle"
   );
+  const [cartMessage, setCartMessage] = useState("");
+
+  const adding = pendingIds.includes(product._id);
 
   const handleWishlist = async (e) => {
     e.stopPropagation();
@@ -20,6 +25,14 @@ function ProductCard({ product, initiallyWishlisted }) {
       setWishlistStatus(res.data.saved ? "saved" : "idle");
     } catch (err) {
       setWishlistStatus("error");
+    }
+  };
+
+  const handleAddToCart = async () => {
+    setCartMessage("");
+    const result = await addToCart(product._id);
+    if (!result.ok) {
+      setCartMessage(result.message);
     }
   };
 
@@ -44,6 +57,16 @@ function ProductCard({ product, initiallyWishlisted }) {
         >
           View Details
         </button>
+
+        <button
+          onClick={handleAddToCart}
+          disabled={adding || product.stock === 0}
+          className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white py-2 rounded font-semibold"
+        >
+          {adding ? "Adding..." : product.stock === 0 ? "Out of stock" : "Add to Cart"}
+        </button>
+
+        {cartMessage && <p className="text-red-400 text-sm">{cartMessage}</p>}
 
         <button
           onClick={handleWishlist}

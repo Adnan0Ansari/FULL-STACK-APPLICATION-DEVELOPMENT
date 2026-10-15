@@ -2,12 +2,15 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import api from "../services/api";
 import Navbar from "../components/Navbar";
+import { useCart } from "../context/CartContext";
 
 function ProductDetails() {
   const { id } = useParams();
+  const { addToCart, pendingIds } = useCart();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [cartMessage, setCartMessage] = useState("");
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -23,6 +26,16 @@ function ProductDetails() {
 
     fetchProduct();
   }, [id]);
+
+  const handleAddToCart = async () => {
+    setCartMessage("");
+    const result = await addToCart(product._id);
+    if (result.ok) {
+      setCartMessage("Added to cart");
+    } else {
+      setCartMessage(result.message);
+    }
+  };
 
   if (loading) {
     return (
@@ -40,6 +53,8 @@ function ProductDetails() {
     );
   }
 
+  const adding = pendingIds.includes(product._id);
+
   return (
     <div className="min-h-screen bg-slate-900">
       <Navbar />
@@ -56,9 +71,14 @@ function ProductDetails() {
         <p className="text-slate-300">
           {product.stock > 0 ? `${product.stock} units in stock` : "Out of stock"}
         </p>
-        <button className="bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded font-semibold">
-          Add to Cart
+        <button
+          onClick={handleAddToCart}
+          disabled={adding || product.stock === 0}
+          className="bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white py-3 rounded font-semibold"
+        >
+          {adding ? "Adding..." : "Add to Cart"}
         </button>
+        {cartMessage && <p className="text-slate-300 text-sm">{cartMessage}</p>}
       </div>
     </div>
   );

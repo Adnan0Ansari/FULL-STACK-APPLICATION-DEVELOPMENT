@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
+import { useCart } from "../context/CartContext";
 
 function Navbar() {
   const navigate = useNavigate();
+  const { cartCount, resetCart } = useCart();
   const [wishlistCount, setWishlistCount] = useState(0);
 
   useEffect(() => {
@@ -22,16 +24,17 @@ function Navbar() {
   const handleLogout = async () => {
     try {
       await api.post("/customers/logout");
-      navigate("/login");
     } catch (err) {
-      navigate("/login");
+      // redirect to login regardless
     }
+    resetCart();
+    navigate("/login");
   };
 
   return (
-    <nav className="bg-slate-800 px-6 py-4 flex justify-between items-center">
+    <nav className="bg-slate-800 px-6 py-4 flex justify-between items-center flex-wrap gap-3">
       <h1 className="text-white font-bold text-lg">ShopKart</h1>
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-6 flex-wrap">
         <Link to="/home" className="text-white hover:text-emerald-400">
           Home
         </Link>
@@ -40,6 +43,12 @@ function Navbar() {
         </Link>
         <Link to="/wishlist" className="text-white hover:text-emerald-400">
           Wishlist ({wishlistCount})
+        </Link>
+        <Link to="/cart" className="text-white hover:text-emerald-400">
+          Cart ({cartCount})
+        </Link>
+        <Link to="/orders" className="text-white hover:text-emerald-400">
+          Orders
         </Link>
         <button
           onClick={handleLogout}
